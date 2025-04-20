@@ -1,5 +1,4 @@
 import pandas as pd
-import os
 
 # Base class for data extraction and cleaning
 class Extractor:
