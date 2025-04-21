@@ -22,6 +22,9 @@ class MpoxExtractor(Extractor):
 
         df["iso_code"] = df["iso_code"].replace("OWID_AFR", None).replace("OWID_ASI", None)
         df["pandemic"] = "mpox"
+        df["pandemic_pathogen"] = "mpox"
+        df["pandemic_start_date"] = "2022-07-01"
+        df["pandemic_end_date"] = "2023-08-01"
 
         df["population"] = None
 

@@ -5,7 +5,16 @@ class Transformer:
     def __init__(self):
         pass
 
-    def transform(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+    def transform(self, df: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+        pandemic_df = df[["pandemic", "pandemic_pathogen", "pandemic_start_date", "pandemic_end_date"]].drop_duplicates().rename(
+            columns={
+                'pandemic': 'name',
+                'pandemic_pathogen': 'pathogen',
+                'pandemic_start_date': 'start_date',
+                'pandemic_end_date': 'end_date'
+            }
+        )
+
         country_df = df[['continent', 'country', 'iso_code', 'population']].drop_duplicates().rename(
             columns={
                 'continent': 'continent',
@@ -40,4 +49,4 @@ class Transformer:
             assert country_df[country_df['name'] == country].shape[0] == 1
 
         # Return all the transformed dataframes
-        return country_df, infection_df, report_df
+        return pandemic_df, country_df, infection_df, report_df

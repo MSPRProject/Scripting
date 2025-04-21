@@ -32,8 +32,8 @@ def handle_file(extractors: [Extractor], transformer: Transformer, loader: Loade
     for extractor in extractors:
         df = extractor.try_extract(path)
         if df is not False:
-            country_df, infection_df, report_df = transformer.transform(df)
-            loader.load(country_df, infection_df, report_df)
+            pandemic_df, country_df, infection_df, report_df = transformer.transform(df)
+            loader.load(pandemic_df, country_df, infection_df, report_df)
             return
     raise Exception(f"Could not find extractor for {path}")
 

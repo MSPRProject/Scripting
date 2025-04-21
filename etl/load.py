@@ -51,16 +51,16 @@ class Loader:
 
         self.country_cache[name] = country_data['_links']['self']['href']
 
-    def _load_pandemic(self, pandemic: str):
-        if pandemic in self.pandemic_cache:
-            return
-
-        name = pandemic
-        pathogen = None
+    def _load_pandemic(self, pandemic: pd.DataFrame):
+        name = pandemic["name"]
+        pathogen = pandemic["pathogen"]
         description = None
-        start_date = None
-        end_date = None
+        start_date = pandemic["start_date"]
+        end_date = pandemic["end_date"]
         notes = None
+
+        if name in self.pandemic_cache:
+            return
 
         # Check if the pandemic already exists in the database
         response = requests.get(
@@ -105,7 +105,7 @@ class Loader:
 
         # Check if the infection already exists in the database
         response = requests.get(
-            f"{self.api_base_url}/infections/search/findByPandemicAndCountry",
+            f"{self.api_base_url}/infections/search/findByPandemicIdAndCountryId",
             params={'pandemic_id': int(pandemic.split('/')[-1]), 'country_id': int(country.split('/')[-1])}
         )
 
@@ -139,7 +139,7 @@ class Loader:
         new_deaths = report['new_deaths']
 
         if (infection, date) in self.report_cache:
-            print(f"WARNING: Report already exists for {infection} on {date}")
+            return
 
         # Check if the report already exists in the database
         response = requests.get(
@@ -152,7 +152,7 @@ class Loader:
         )
 
         if response.status_code == 200:
-            print(f"WARNING: Report already exists for {infection} on {date}")
+            return
         elif response.status_code == 404:
             # Report does not exist, create it
             payload = {
@@ -170,14 +170,14 @@ class Loader:
         else:
             raise Exception(f"Error checking report: {response.text}")
 
-    def load(self, country_df: pd.DataFrame, infection_df: pd.DataFrame, report_df: pd.DataFrame):
+    def load(self, pandemic_df: pd.DataFrame, country_df: pd.DataFrame, infection_df: pd.DataFrame, report_df: pd.DataFrame):
         print(f"Loading {country_df.shape[0]} countries, {infection_df.shape[0]} infections, {report_df.shape[0]} reports")
         # Load countries
         for _, country in tqdm(country_df.iterrows(), desc="Loading countries", total=country_df.shape[0]):
             self._load_country(country)
 
         # Load pandemics
-        for pandemic in tqdm(infection_df["pandemic"].unique(), desc="Loading pandemics", total=len(infection_df["pandemic"].unique())):
+        for _, pandemic in tqdm(pandemic_df.iterrows(), desc="Loading pandemics", total=pandemic_df.shape[0]):
             self._load_pandemic(pandemic)
 
         # Load infections
