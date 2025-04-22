@@ -19,13 +19,13 @@ class Loader:
         continent = country['continent']
         population = country['population']
 
-        if name in self.country_cache:
+        if iso3 in self.country_cache:
             return
 
         # Check if the country already exists in the database
         response = requests.get(
-            f"{self.api_base_url}/countries/search/findByName",
-            params={"name": name}
+            f"{self.api_base_url}/countries/search/findByIso3",
+            params={"iso3": iso3}
         )
 
         if response.status_code == 200:
@@ -49,7 +49,7 @@ class Loader:
         else:
             raise Exception(f"Error checking country {name}: {response.text}")
 
-        self.country_cache[name] = country_data['_links']['self']['href']
+        self.country_cache[iso3] = country_data['_links']['self']['href']
 
     def _load_pandemic(self, pandemic: pd.DataFrame):
         name = pandemic["name"]
@@ -95,12 +95,12 @@ class Loader:
         self.pandemic_cache[name] = pandemic_data['_links']['self']['href']
 
     def _load_infection(self, infection: pd.DataFrame):
-        country = self.country_cache[infection['country']]
+        country = self.country_cache[infection['iso3']]
         pandemic = self.pandemic_cache[infection['pandemic']]
         total_cases = infection['total_cases']
         total_deaths = infection['total_deaths']
 
-        if (infection['country'], infection['pandemic']) in self.infection_cache:
+        if (infection['iso3'], infection['pandemic']) in self.infection_cache:
             return
 
         # Check if the infection already exists in the database
@@ -130,10 +130,10 @@ class Loader:
         else:
             raise Exception(f"Error checking infection: {response.text}")
 
-        self.infection_cache[(infection['country'], infection['pandemic'])] = infection_data["_links"]["self"]["href"]
+        self.infection_cache[(infection['iso3'], infection['pandemic'])] = infection_data["_links"]["self"]["href"]
 
     def _load_report(self, report: pd.DataFrame):
-        infection = self.infection_cache[(report['country'], report['pandemic'])]
+        infection = self.infection_cache[(report['iso3'], report['pandemic'])]
         date: Timestamp = report['date']
         new_cases = report['new_cases']
         new_deaths = report['new_deaths']
@@ -146,7 +146,7 @@ class Loader:
             f"{self.api_base_url}/reports/search/findByDateAndCountryIdAndPandemicId",
             params={
                 "date": date.date().isoformat(),
-                "country_id": int(self.country_cache[report['country']].split("/")[-1]),
+                "country_id": int(self.country_cache[report['iso3']].split("/")[-1]),
                 "pandemic_id": int(self.pandemic_cache[report['pandemic']].split("/")[-1])
             }
         )

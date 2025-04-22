@@ -24,20 +24,26 @@ class Transformer:
         )
 
         infection_df = (
-            df.groupby(['country', 'pandemic'], as_index=False)
+            df.groupby(['iso_code', 'pandemic'], as_index=False)
             .agg({
                 'total_cases': 'max',
                 'total_deaths': 'max'
             })
             .rename(columns={
+                'iso3': 'iso3',
                 'total_cases': 'total_cases',
                 'total_deaths': 'total_deaths'
             })
         )
-        infection_df = infection_df[['country', 'pandemic', 'total_cases', 'total_deaths']]
-
-        report_df = df[['country', 'pandemic', 'date', 'new_cases', 'new_deaths']].rename(
+        infection_df = infection_df[['iso_code', 'pandemic', 'total_cases', 'total_deaths']].rename(
             columns={
+                'iso_code': 'iso3',
+            }
+        )
+
+        report_df = df[['iso_code', 'pandemic', 'date', 'new_cases', 'new_deaths']].rename(
+            columns={
+                'iso_code': 'iso3',
                 'date': 'date',
                 'new_cases': 'new_cases',
                 'new_deaths': 'new_deaths'
@@ -45,8 +51,8 @@ class Transformer:
         )
 
         # Sanity checks
-        for country in country_df['name'].unique():
-            assert country_df[country_df['name'] == country].shape[0] == 1
+        for country in country_df['iso3'].unique():
+            assert country_df[country_df['iso3'] == country].shape[0] == 1
 
         # Return all the transformed dataframes
         return pandemic_df, country_df, infection_df, report_df
