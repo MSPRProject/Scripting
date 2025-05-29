@@ -40,7 +40,7 @@ class Covid19Extractor(Extractor):
         df[["continent", "country"]] = df["country"].map(location_mapping).apply(pd.Series)
         df["iso_code"] = df["country"].map(country_to_iso3)
         # Add pandemic metadata
-        df["pandemic"] = "covid-19"
+        df["pandemic"] = "Covid-19"
         df["pandemic_pathogen"] = "SARS-CoV-2"
         df["pandemic_start_date"] = "2019-12-01"
         df["pandemic_end_date"] = "2023-07-01"

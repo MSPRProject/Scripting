@@ -21,7 +21,7 @@ class MpoxExtractor(Extractor):
         df[["continent", "country"]] = df["location"].map(location_mapping).apply(pd.Series)
 
         df["iso_code"] = df["iso_code"].replace("OWID_AFR", None).replace("OWID_ASI", None)
-        df["pandemic"] = "mpox"
+        df["pandemic"] = "Mpox"
         df["pandemic_pathogen"] = "mpox"
         df["pandemic_start_date"] = "2022-07-01"
         df["pandemic_end_date"] = "2023-08-01"
